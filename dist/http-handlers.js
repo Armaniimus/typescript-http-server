@@ -1,8 +1,31 @@
 import express from "express";
 import { config } from "./config.js";
+import { BadRequestError } from "./error-handlers.js";
 const api = {
     healthz: (req, res) => {
         res.set("Content-Type", "text/plain; charset=utf-8").send("OK");
+    },
+    validate_chirp: (req, res) => {
+        const params = req.body;
+        if (typeof params.body != "string") {
+            throw new BadRequestError("body was malformed");
+        }
+        else if (params.body.length > 140) {
+            throw new BadRequestError("Chirp is too long. Max length is 140");
+        }
+        else {
+            const validWords = [];
+            const invalidWords = ["kerfuffle", "sharbert", "fornax"];
+            for (const w of params.body.split(" ")) {
+                if (invalidWords.includes(w.toLowerCase())) {
+                    validWords.push("****");
+                }
+                else {
+                    validWords.push(w);
+                }
+            }
+            res.status(200).send({ "cleanedBody": validWords.join(" ") });
+        }
     }
 };
 const admin = {
