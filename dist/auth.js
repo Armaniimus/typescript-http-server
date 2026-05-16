@@ -1,11 +1,13 @@
 import * as argon2 from "argon2";
 import jwt from "jsonwebtoken";
 import { UnauthorizedError } from "./handlers/error-handlers.js";
+import * as crypto from "crypto";
+import { config } from "./config.js";
 function isValidUUID(uuid) {
     const regex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
     return regex.test(uuid);
 }
-function payloadBuilder(userID, expiresIn) {
+function payloadBuilder(userID) {
     if (!isValidUUID(userID)) {
         console.error(`tried to use an invalid userId in the bearer token ->`, userID);
         throw new UnauthorizedError("Invalid token");
@@ -15,7 +17,7 @@ function payloadBuilder(userID, expiresIn) {
         iss: "chirpy",
         sub: userID,
         iat: Math.floor(Date.now() / 1000),
-        exp: Math.floor(Date.now() / 1000) + expiresIn
+        exp: Math.floor(Date.now() / 1000) + (3600)
     };
 }
 export async function hashPassword(password) {
@@ -24,8 +26,8 @@ export async function hashPassword(password) {
 export async function checkPasswordHash(password, hash) {
     return argon2.verify(hash, password);
 }
-export function makeJWT(userID, expiresIn, secret) {
-    return jwt.sign(payloadBuilder(userID, expiresIn), secret);
+export function makeJWT(userID) {
+    return jwt.sign(payloadBuilder(userID), config.api.secret);
 }
 export function validateJWT(tokenString, secret) {
     let decoded;
@@ -33,7 +35,7 @@ export function validateJWT(tokenString, secret) {
         decoded = jwt.verify(tokenString, secret, { issuer: "chirpy" });
     }
     catch (err) {
-        console.log("Invalid token: " + (err instanceof Error ? err.message : err));
+        console.log("Invalid token: jwt.verify failed -> " + (err instanceof Error ? err.message : err));
         throw new UnauthorizedError("Invalid token");
     }
     if (!decoded.sub) {
@@ -52,4 +54,7 @@ export function getBearerToken(req) {
         throw new UnauthorizedError("failed to provide bearer token");
     }
     return header.replace("Bearer", "").trim();
+}
+export function makeRefreshToken() {
+    return crypto.randomBytes(32).toString('hex');
 }

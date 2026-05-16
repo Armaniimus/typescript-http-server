@@ -2,7 +2,7 @@ import express from "express";
 import { config } from "./config.js";
 // import { post_chirp, get_allChirps, post_users, admin_reset, get_chirp, login } from "./handlers/http-handlers.js";
 import { post_chirp, get_allChirps, get_chirp } from "./handlers/chirpsHandler.js";
-import { login } from "./handlers/authHandler.js";
+import { login, refresh, revoke } from "./handlers/authHandler.js";
 import { post_users, admin_reset } from "./handlers/otherHandler.js";
 const api = {
     healthz: (req, res) => {
@@ -10,6 +10,8 @@ const api = {
     },
     post_users: post_users,
     login: login,
+    refresh: refresh,
+    revoke: revoke,
 };
 const chirps = {
     post: post_chirp,

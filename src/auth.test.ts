@@ -24,12 +24,12 @@ describe("JWT token validation", () => {
 	const userId2 = "john@gmail.com";
 
 	it("should create token correctly", async () => {
-		const result = await makeJWT(userId1, 20000, config.api.secret);
+		const result = await makeJWT(userId1);
 		expect(result).toBeTypeOf("string");
 	});
 
 	it("should validate token correctly", async () => {
-		const token = await makeJWT(userId2, 20000, config.api.secret);
+		const token = await makeJWT(userId2);
 		const result = validateJWT(token, config.api.secret)
 
 		expect(result).toBe(userId2);

@@ -4,6 +4,8 @@ import { Request} from "express";
 import type { JwtPayload } from "jsonwebtoken";
 import { UnauthorizedError } from "./handlers/error-handlers.js";
 import * as crypto from "crypto";
+import { config } from "./config.js";
+
 
 type payload = Pick<JwtPayload, "iss" | "sub" | "iat" | "exp">;
 
@@ -12,7 +14,7 @@ function isValidUUID(uuid: string) {
 	return regex.test(uuid);
 }
 
-function payloadBuilder(userID: string, expiresIn: number): payload {
+function payloadBuilder(userID: string): payload {
 	if (!isValidUUID(userID)) {
 		console.error(`tried to use an invalid userId in the bearer token ->`, userID )
 		throw new UnauthorizedError("Invalid token")
@@ -22,7 +24,7 @@ function payloadBuilder(userID: string, expiresIn: number): payload {
 		iss: "chirpy",
 		sub: userID, 
 		iat: Math.floor(Date.now() / 1000), 
-		exp: Math.floor(Date.now() / 1000) + expiresIn
+		exp: Math.floor(Date.now() / 1000) + (3600)
 	}
 }
 
@@ -34,8 +36,8 @@ export async function checkPasswordHash(password: string, hash: string): Promise
 	return argon2.verify(hash, password, );
 }
 
-export function makeJWT(userID: string, expiresIn: number, secret: string): string {
-	return jwt.sign(payloadBuilder(userID, expiresIn), secret);
+export function makeJWT(userID: string): string {
+	return jwt.sign(payloadBuilder(userID), config.api.secret);
 }
 
 export function validateJWT(tokenString: string, secret: string): string {	
@@ -44,7 +46,7 @@ export function validateJWT(tokenString: string, secret: string): string {
 		decoded = jwt.verify(tokenString, secret, { issuer: "chirpy" }) as JwtPayload;
 		
 	} catch(err) {	
-		console.log("Invalid token: " + (err instanceof Error ? err.message : err));
+		console.log("Invalid token: jwt.verify failed -> " + (err instanceof Error ? err.message : err));
 		throw new UnauthorizedError("Invalid token");
 	}
 
@@ -70,5 +72,5 @@ export function getBearerToken(req: Request): string {
 }
 
 export function makeRefreshToken():string {
-	return crypto.randomBytes(32).toString('hex')
+	return crypto.randomBytes(32).toString('hex');
 }

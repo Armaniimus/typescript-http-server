@@ -14,6 +14,8 @@ app.use("/", middlewareLogResponses, express.json());
 app.use("/app", fileServerHits, routes.app);
 app.get("/api/healthz", routes.api.healthz);
 app.post("/api/login", routes.api.login);
+app.post("/api/refresh", routes.api.refresh);
+app.post("/api/revoke", routes.api.revoke);
 app.post("/api/chirps", routes.api.chirps.post);
 app.get("/api/chirps", routes.api.chirps.getAll);
 app.get("/api/chirps/:id", routes.api.chirps.get);

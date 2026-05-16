@@ -1,7 +1,7 @@
 import { BadRequestError, UnauthorizedError, NotFoundError } from "./error-handlers.js";
 import { selectUserByEmail } from "../db/queries/users.js";
-import { config } from "../config.js";
-import { checkPasswordHash, makeJWT } from "../auth.js";
+import { checkPasswordHash, makeJWT, makeRefreshToken, getBearerToken } from "../auth.js";
+import { createToken, selectToken, revokeToken } from "../db/queries/tokens.js";
 export const login = async (req, res) => {
     const params = req.body;
     if (typeof params.email != "string") {
@@ -19,15 +19,47 @@ export const login = async (req, res) => {
             throw new UnauthorizedError("login failed");
         }
         else {
-            const expirationTime = (typeof params.expiresInSeconds == "number" ? params.expiresInSeconds : 3600 * 1000);
-            const token = await makeJWT(user.id, expirationTime, config.api.secret);
+            const token = await makeJWT(user.id);
+            const refreshToken = await makeRefreshToken();
+            await createToken({ token: refreshToken, userId: user.id });
             res.status(200).send({
                 "id": user.id,
                 "createdAt": user.createdAt,
                 "updatedAt": user.updatedAt,
                 "email": user.email,
-                "token": token
+                "token": token,
+                "refreshToken": refreshToken
             });
         }
     }
+};
+export const refresh = async (req, res) => {
+    const refreshToken = getBearerToken(req);
+    const tokenObj = await selectToken(refreshToken);
+    if (!tokenObj) {
+        console.log("invalid token: user supplied token doesnt exist in db");
+        throw new UnauthorizedError("invalid token");
+    }
+    else if (!!tokenObj.revoked_at) {
+        console.log("invalid token: user supplied token is revoked");
+        throw new UnauthorizedError("invalid token");
+    }
+    else if (Date.now() > tokenObj.expires_at.getTime()) {
+        console.log("invalid token: is expired", tokenObj.expires_at, new Date());
+        throw new UnauthorizedError("invalid token");
+    }
+    const newToken = await makeJWT(tokenObj.userId);
+    res.status(200).send({ "token": newToken });
+};
+export const revoke = async (req, res) => {
+    const refreshToken = getBearerToken(req);
+    try {
+        await revokeToken(refreshToken);
+    }
+    catch (err) {
+        const errMess = "revokeToken Failed -> " + (err instanceof Error ? err.message : err);
+        console.log(errMess);
+        throw new UnauthorizedError("invalid token");
+    }
+    res.status(204).send();
 };
