@@ -1,7 +1,7 @@
 import express from "express";
 import { Request, Response, RequestHandler } from "express"; 
 import { config } from "./config.js";
-import { post_chirp, get_allChirps, post_users, admin_reset, get_chirp } from "./http-handlers.js";
+import { post_chirp, get_allChirps, post_users, admin_reset, get_chirp, login } from "./http-handlers.js";
 
 export type StrictHandler = (req: Request, res: Response) => void
 type StrictRoutes = { [key: string]: StrictHandler };
@@ -12,6 +12,7 @@ const api = {
 		res.set("Content-Type", "text/plain; charset=utf-8").send("OK");
 	},
 	post_users: post_users,
+	login: login,
 } satisfies StrictRoutes;
 
 const chirps: StrictRoutes = {

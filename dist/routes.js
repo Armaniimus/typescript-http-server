@@ -1,11 +1,12 @@
 import express from "express";
 import { config } from "./config.js";
-import { post_chirp, get_allChirps, post_users, admin_reset, get_chirp } from "./http-handlers.js";
+import { post_chirp, get_allChirps, post_users, admin_reset, get_chirp, login } from "./http-handlers.js";
 const api = {
     healthz: (req, res) => {
         res.set("Content-Type", "text/plain; charset=utf-8").send("OK");
     },
     post_users: post_users,
+    login: login,
 };
 const chirps = {
     post: post_chirp,

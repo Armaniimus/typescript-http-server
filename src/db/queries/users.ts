@@ -20,6 +20,15 @@ export async function selectUser(id: string) {
 	return result;
 }
 
+export async function selectUserByEmail(email: string) {
+	const [result] = await db
+		.select()
+		.from(users)
+		.where(eq(users.email, email))
+
+	return result;
+}
+
 export async function deleteUser() {
 	const [result] = await db
 		.delete(users).returning();

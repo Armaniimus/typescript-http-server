@@ -1,23 +1,58 @@
-import { BadRequestError, ConflictError, ForbiddenError, NotFoundError, UnprocessableEntityError } from "./error-handlers.js";
-import { createUser, deleteUser, selectUser } from "./db/queries/users.js";
+import { BadRequestError, ConflictError, UnauthorizedError, ForbiddenError, NotFoundError, UnprocessableEntityError } from "./error-handlers.js";
+import { createUser, deleteUser, selectUser, selectUserByEmail } from "./db/queries/users.js";
 import { createChirp, selectAllChirps, selectChirp } from "./db/queries/chirps.js";
 import { config } from "./config.js";
+import { hashPassword, checkPasswordHash } from "./auth.js";
 function isValidUUID(uuid) {
     const regex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
     return regex.test(uuid);
 }
+export const login = async (req, res) => {
+    const params = req.body;
+    if (typeof params.email != "string") {
+        throw new BadRequestError("body was malformed");
+    }
+    else if (typeof params.password != "string") {
+        throw new BadRequestError("body was malformed");
+    }
+    else {
+        const user = await selectUserByEmail(params.email);
+        if (user == undefined) {
+            throw new NotFoundError("user doesn't exist");
+        }
+        else if (await checkPasswordHash(params.password, user.hashed_password) == false) {
+            throw new UnauthorizedError("login failed");
+        }
+        else {
+            res.status(200).send({
+                "id": user.id,
+                "createdAt": user.createdAt,
+                "updatedAt": user.updatedAt,
+                "email": user.email
+            });
+        }
+    }
+};
 export const post_users = async (req, res) => {
     const params = req.body;
     if (typeof params.email != "string") {
         throw new BadRequestError("body was malformed");
     }
+    else if (typeof params.password != "string") {
+        throw new BadRequestError("body was malformed");
+    }
     else {
-        const result = await createUser({ email: params.email });
-        if (result == undefined) {
+        const user = await createUser({ email: params.email, hashed_password: await hashPassword(params.password) });
+        if (user == undefined) {
             throw new ConflictError("resource already exists");
         }
         else {
-            res.status(201).send(result);
+            res.status(201).send({
+                "id": user.id,
+                "createdAt": user.createdAt,
+                "updatedAt": user.updatedAt,
+                "email": user.email
+            });
         }
     }
 };
