@@ -17,5 +17,6 @@ export const config = {
     },
     api: {
         fileserverHits: 0,
+        secret: envOrThrow("SECRET"),
     },
 };

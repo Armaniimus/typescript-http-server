@@ -1,7 +1,11 @@
 import express from "express";
 import { Request, Response, RequestHandler } from "express"; 
 import { config } from "./config.js";
-import { post_chirp, get_allChirps, post_users, admin_reset, get_chirp, login } from "./http-handlers.js";
+// import { post_chirp, get_allChirps, post_users, admin_reset, get_chirp, login } from "./handlers/http-handlers.js";
+import { post_chirp, get_allChirps, get_chirp } from "./handlers/chirpsHandler.js";
+import { login } from "./handlers/authHandler.js";
+import { post_users, admin_reset } from "./handlers/otherHandler.js";
+
 
 export type StrictHandler = (req: Request, res: Response) => void
 type StrictRoutes = { [key: string]: StrictHandler };

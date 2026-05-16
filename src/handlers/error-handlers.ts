@@ -1,6 +1,6 @@
 
 import { Request, Response, NextFunction } from "express";
-import { config } from "./config.js";
+import { config } from "../config.js";
 
 type ErrorHandler = (err: Error, req: Request, res: Response, next: NextFunction) => void
 

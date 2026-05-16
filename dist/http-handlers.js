@@ -2,7 +2,7 @@ import { BadRequestError, ConflictError, UnauthorizedError, ForbiddenError, NotF
 import { createUser, deleteUser, selectUser, selectUserByEmail } from "./db/queries/users.js";
 import { createChirp, selectAllChirps, selectChirp } from "./db/queries/chirps.js";
 import { config } from "./config.js";
-import { hashPassword, checkPasswordHash } from "./auth.js";
+import { hashPassword, checkPasswordHash, makeJWT } from "./auth.js";
 function isValidUUID(uuid) {
     const regex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
     return regex.test(uuid);
@@ -24,11 +24,14 @@ export const login = async (req, res) => {
             throw new UnauthorizedError("login failed");
         }
         else {
+            const expirationTime = (typeof params.expiresInSeconds == "number" ? params.expiresInSeconds : 3600 * 1000);
+            const token = await makeJWT(user.id, expirationTime, config.api.secret);
             res.status(200).send({
                 "id": user.id,
                 "createdAt": user.createdAt,
                 "updatedAt": user.updatedAt,
-                "email": user.email
+                "email": user.email,
+                "token": token
             });
         }
     }

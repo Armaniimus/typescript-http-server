@@ -6,7 +6,7 @@ const migrationClient = postgres(config.db.url, { max: 1 });
 await migrate(drizzle(migrationClient), config.db.migrationConfig);
 import express from "express";
 import { middlewareLogResponses, fileServerHits } from "./middleware.js";
-import { generalError } from "./error-handlers.js";
+import { generalError } from "./handlers/error-handlers.js";
 import { routes } from "./routes.js";
 const app = express();
 const PORT = 8080;

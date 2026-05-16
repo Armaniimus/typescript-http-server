@@ -8,7 +8,10 @@ type Config = {
 		platform: string
 		migrationConfig: MigrationConfig
 	};
-	api: { fileserverHits: number }
+	api: { 
+		fileserverHits: number 
+		secret: string
+	}
 }
 
 function envOrThrow(key: string) {
@@ -33,5 +36,6 @@ export const config: Config = {
 
 	api: {
 		fileserverHits: 0,
+		secret: envOrThrow("SECRET"),
 	},
 };

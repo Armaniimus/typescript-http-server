@@ -9,7 +9,8 @@
     "dev": "npx tsc && node dist/index.js",
     "generate": "drizzle-kit generate",
     "migrate": "drizzle-kit migrate",
-    "push": "npx drizzle-kit push"
+    "push": "npx drizzle-kit push",
+    "test": "vitest --run"
   },
   "repository": {
     "type": "git",
@@ -28,7 +29,8 @@
     "@types/jsonwebtoken": "^9.0.10",
     "@types/node": "^25.7.0",
     "drizzle-kit": "^0.31.10",
-    "typescript": "^6.0.3"
+    "typescript": "^6.0.3",
+    "vitest": "^3.2.4"
   },
   "dependencies": {
     "argon2": "^0.44.0",

@@ -11,7 +11,7 @@ await migrate(drizzle(migrationClient), config.db.migrationConfig);
 
 import express from "express";
 import { middlewareLogResponses, fileServerHits } from "./middleware.js";
-import { generalError } from "./error-handlers.js";
+import { generalError } from "./handlers/error-handlers.js";
 import { routes } from "./routes.js";
 
 
