@@ -1,10 +1,10 @@
 import express from "express";
 import { Request, Response, RequestHandler } from "express"; 
 import { config } from "./config.js";
-// import { post_chirp, get_allChirps, post_users, admin_reset, get_chirp, login } from "./handlers/http-handlers.js";
-import { post_chirp, get_allChirps, get_chirp } from "./handlers/chirpsHandler.js";
+
+import { post_chirp, get_allChirps, get_chirp, delete_chirp } from "./handlers/chirpsHandler.js";
 import { login, refresh, revoke } from "./handlers/authHandler.js";
-import { post_users, admin_reset } from "./handlers/otherHandler.js";
+import { post_users, put_users, admin_reset } from "./handlers/otherHandler.js";
 
 
 export type StrictHandler = (req: Request, res: Response) => void
@@ -16,6 +16,7 @@ const api = {
 		res.set("Content-Type", "text/plain; charset=utf-8").send("OK");
 	},
 	post_users: post_users,
+	put_users: put_users,
 	login: login,
 	refresh: refresh,
 	revoke: revoke,
@@ -24,7 +25,8 @@ const api = {
 const chirps: StrictRoutes = {
 	post: post_chirp,
 	getAll: get_allChirps,
-	get: get_chirp
+	get: get_chirp,
+	delete: delete_chirp
 }
 
 const admin: StrictRoutes = {

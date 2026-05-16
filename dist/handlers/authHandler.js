@@ -45,7 +45,7 @@ export const refresh = async (req, res) => {
         throw new UnauthorizedError("invalid token");
     }
     else if (Date.now() > tokenObj.expires_at.getTime()) {
-        console.log("invalid token: is expired", tokenObj.expires_at, new Date());
+        console.log("invalid token: is expired");
         throw new UnauthorizedError("invalid token");
     }
     const newToken = await makeJWT(tokenObj.userId);

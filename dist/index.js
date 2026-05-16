@@ -19,9 +19,11 @@ app.post("/api/revoke", routes.api.revoke);
 app.post("/api/chirps", routes.api.chirps.post);
 app.get("/api/chirps", routes.api.chirps.getAll);
 app.get("/api/chirps/:id", routes.api.chirps.get);
+app.delete("/api/chirps/:id", routes.api.chirps.delete);
 app.get("/admin/metrics", routes.admin.metrics);
 app.post("/admin/reset", routes.admin.reset);
 app.post("/api/users", routes.api.post_users);
+app.put("/api/users", routes.api.put_users);
 app.use(generalError);
 app.listen(PORT, () => {
     console.log(`Server is running at http://localhost:${PORT}`);

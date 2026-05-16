@@ -2,8 +2,30 @@ import { BadRequestError, ConflictError, UnauthorizedError, ForbiddenError, NotF
 import { StrictHandler } from "../routes.js";
 import { getBearerToken, validateJWT } from "../auth.js";
 import { selectUser } from "../db/queries/users.js";
-import { createChirp, selectAllChirps, selectChirp } from "../db/queries/chirps.js";
+import { createChirp, deleteChirp, selectAllChirps, selectChirp } from "../db/queries/chirps.js";
 import {config} from "../config.js";
+
+export const delete_chirp: StrictHandler = async (req, res) => {
+	const id = req.params.id as string;
+	if (id == undefined) {
+		throw new NotFoundError("id param doesn't exist")
+	}
+
+	const userId = validateJWT(getBearerToken(req), config.api.secret);
+	const chirp = await selectChirp(id);
+
+	if (chirp == undefined) {
+		throw new NotFoundError("chirp does not exist")
+	}
+
+	if (chirp.userId != userId) {
+		throw new ForbiddenError("unauthorized for this action");
+	}
+
+	await deleteChirp(chirp.id, userId);
+
+	res.status(204).send();
+}
 
 export const post_chirp: StrictHandler = async (req, res) => {
 	const params: { body: string} = req.body;

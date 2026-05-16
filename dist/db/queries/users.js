@@ -9,6 +9,13 @@ export async function createUser(user) {
         .returning();
     return result;
 }
+export async function updateUser(id, body) {
+    const [result] = await db.update(users)
+        .set({ email: body.email, hashed_password: body.password })
+        .where(eq(users.id, id))
+        .returning();
+    return result;
+}
 export async function selectUser(id) {
     const [result] = await db
         .select()

@@ -1,7 +1,8 @@
 import { BadRequestError, ConflictError, ForbiddenError } from "./error-handlers.js";
-import { createUser, deleteUser } from "../db/queries/users.js";
+import { createUser, deleteUser, updateUser } from "../db/queries/users.js";
 import { config } from "../config.js";
-import { hashPassword } from "../auth.js";
+import { hashPassword, getBearerToken } from "../auth.js";
+import { validateJWT } from "../auth.js";
 export const post_users = async (req, res) => {
     const params = req.body;
     if (typeof params.email != "string") {
@@ -17,6 +18,30 @@ export const post_users = async (req, res) => {
         }
         else {
             res.status(201).send({
+                "id": user.id,
+                "createdAt": user.createdAt,
+                "updatedAt": user.updatedAt,
+                "email": user.email
+            });
+        }
+    }
+};
+export const put_users = async (req, res) => {
+    const params = req.body;
+    if (typeof params.password != "string") {
+        throw new BadRequestError("body was malformed");
+    }
+    else if (typeof params.email != "string") {
+        throw new BadRequestError("body was malformed");
+    }
+    else {
+        const userId = validateJWT(getBearerToken(req), config.api.secret);
+        const user = await updateUser(userId, { email: params.email, password: await hashPassword(params.password) });
+        if (user == undefined) {
+            throw new ConflictError("resource already exists");
+        }
+        else {
+            res.status(200).send({
                 "id": user.id,
                 "createdAt": user.createdAt,
                 "updatedAt": user.updatedAt,
