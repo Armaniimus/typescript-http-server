@@ -8,6 +8,6 @@ export const middlewareLogResponses = (req, res, next) => {
     next();
 };
 export const fileServerHits = (req, res, next) => {
-    config.fileserverHits += 1;
+    config.api.fileserverHits += 1;
     next();
 };
