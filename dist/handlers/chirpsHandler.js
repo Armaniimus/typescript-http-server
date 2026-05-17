@@ -55,17 +55,21 @@ export const get_allChirps = async (req, res) => {
     let authorId = "";
     if (typeof req.query.authorId === "string") {
         authorId = req.query.authorId;
-        if (authorId !== "") {
-            if (!isValidUUID(authorId)) {
-                res.status(200).send([]);
-                return;
-            }
-            const result = await selectChirpByUserId(authorId);
-            res.status(200).send(result);
+    }
+    let sortAsc = true;
+    if (typeof req.query.sort === "string" && req.query.sort == "desc") {
+        sortAsc = false;
+    }
+    if (authorId !== "") {
+        if (!isValidUUID(authorId)) {
+            res.status(200).send([]);
             return;
         }
+        const result = await selectChirpByUserId(authorId, sortAsc);
+        res.status(200).send(result);
+        return;
     }
-    const result = await selectAllChirps();
+    const result = await selectAllChirps(sortAsc);
     res.status(200).send(result);
     return;
 };
