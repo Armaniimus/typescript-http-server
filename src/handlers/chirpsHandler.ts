@@ -2,8 +2,9 @@ import { BadRequestError, ConflictError, UnauthorizedError, ForbiddenError, NotF
 import { StrictHandler } from "../routes.js";
 import { getBearerToken, validateJWT } from "../auth.js";
 import { selectUser } from "../db/queries/users.js";
-import { createChirp, deleteChirp, selectAllChirps, selectChirp } from "../db/queries/chirps.js";
+import { createChirp, deleteChirp, selectAllChirps, selectChirp, selectChirpByUserId } from "../db/queries/chirps.js";
 import {config} from "../config.js";
+import { isValidUUID } from "../util.js";
 
 export const delete_chirp: StrictHandler = async (req, res) => {
 	const id = req.params.id as string;
@@ -66,8 +67,25 @@ export const post_chirp: StrictHandler = async (req, res) => {
 }
 
 export const get_allChirps: StrictHandler = async (req, res) => {
+	let authorId = "";
+	if (typeof req.query.authorId === "string") {
+		authorId = req.query.authorId;
+
+		if (authorId !== "") {
+			if (!isValidUUID(authorId)) {
+				res.status(200).send([]);
+				return;
+			}
+
+			const result = await selectChirpByUserId(authorId);
+			res.status(200).send(result);	
+			return;
+		} 
+	}
+
 	const result = await selectAllChirps();
 	res.status(200).send(result);
+	return;
 }
 
 export const get_chirp: StrictHandler = async (req, res) => {

@@ -16,6 +16,13 @@ export async function updateUser(id, body) {
         .returning();
     return result;
 }
+export async function upgradeUser(id) {
+    const [result] = await db.update(users)
+        .set({ is_chirpy_red: true })
+        .where(eq(users.id, id))
+        .returning();
+    return result;
+}
 export async function selectUser(id) {
     const [result] = await db
         .select()

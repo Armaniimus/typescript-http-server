@@ -3,10 +3,7 @@ import jwt from "jsonwebtoken";
 import { UnauthorizedError } from "./handlers/error-handlers.js";
 import * as crypto from "crypto";
 import { config } from "./config.js";
-function isValidUUID(uuid) {
-    const regex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
-    return regex.test(uuid);
-}
+import { isValidUUID } from "./util.js";
 function payloadBuilder(userID) {
     if (!isValidUUID(userID)) {
         console.error(`tried to use an invalid userId in the bearer token ->`, userID);
@@ -57,4 +54,11 @@ export function getBearerToken(req) {
 }
 export function makeRefreshToken() {
     return crypto.randomBytes(32).toString('hex');
+}
+export function getAPIKey(req) {
+    const header = req.get("Authorization");
+    if (!header) {
+        throw new UnauthorizedError("failed to provide api key");
+    }
+    return header.replace("ApiKey", "").trim();
 }

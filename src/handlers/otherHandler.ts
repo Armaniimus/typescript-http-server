@@ -1,11 +1,36 @@
 import { BadRequestError, ConflictError, UnauthorizedError, ForbiddenError, NotFoundError, UnprocessableEntityError } from "./error-handlers.js";
 import { StrictHandler } from "../routes.js";
 
-import { createUser, deleteUser, updateUser, selectUserByEmail } from "../db/queries/users.js";
+import { createUser, deleteUser, updateUser, selectUserByEmail, upgradeUser, selectUser } from "../db/queries/users.js";
 import { config } from "../config.js";
-import { hashPassword, checkPasswordHash, makeJWT, getBearerToken } from "../auth.js";
+import { hashPassword, checkPasswordHash, makeJWT, getBearerToken, getAPIKey } from "../auth.js";
 import { validateJWT } from "../auth.js";
 
+
+export const upgrade_user: StrictHandler = async (req, res) => {
+	const params: { event: "user.upgraded", data: { userId: string}} = req.body;
+	const ApiKey = getAPIKey(req);
+
+	if (config.api.polkaKey != ApiKey) {
+		throw new UnauthorizedError("invalid request")
+
+	} else if (params.event != "user.upgraded") {
+		res.status(204).send();
+
+	} else if (params.data == undefined || typeof params.data.userId != "string") {
+		throw new BadRequestError("body was malformed");
+
+	} else {
+		const user = selectUser(params.data.userId)
+
+		if (user == undefined) {
+			throw new NotFoundError("resource does not exist");
+		}
+
+		await upgradeUser(params.data.userId);
+		res.status(204).send();
+	}
+}
 
 export const post_users: StrictHandler = async (req, res) => {
 	const params: { email: string, password: string } = req.body;
@@ -25,7 +50,8 @@ export const post_users: StrictHandler = async (req, res) => {
 				"id": user.id,
 				"createdAt": user.createdAt,
 				"updatedAt": user.updatedAt,
-				"email": user.email
+				"email": user.email,
+				"isChirpyRed": user.is_chirpy_red
 			});
 		}		
 	}
@@ -50,7 +76,8 @@ export const put_users: StrictHandler = async (req, res) => {
 				"id": user.id,
 				"createdAt": user.createdAt,
 				"updatedAt": user.updatedAt,
-				"email": user.email
+				"email": user.email,
+				"isChirpyRed": user.is_chirpy_red
 			});
 		}
 	}

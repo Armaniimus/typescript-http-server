@@ -11,6 +11,7 @@ type Config = {
 	api: { 
 		fileserverHits: number 
 		secret: string
+		polkaKey: string
 	}
 }
 
@@ -37,5 +38,6 @@ export const config: Config = {
 	api: {
 		fileserverHits: 0,
 		secret: envOrThrow("SECRET"),
+		polkaKey: envOrThrow("POLKA_KEY")
 	},
 };

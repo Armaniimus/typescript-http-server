@@ -2,13 +2,14 @@ import express from "express";
 import { config } from "./config.js";
 import { post_chirp, get_allChirps, get_chirp, delete_chirp } from "./handlers/chirpsHandler.js";
 import { login, refresh, revoke } from "./handlers/authHandler.js";
-import { post_users, put_users, admin_reset } from "./handlers/otherHandler.js";
+import { post_users, put_users, admin_reset, upgrade_user } from "./handlers/otherHandler.js";
 const api = {
     healthz: (req, res) => {
         res.set("Content-Type", "text/plain; charset=utf-8").send("OK");
     },
     post_users: post_users,
     put_users: put_users,
+    upgrade_user: upgrade_user,
     login: login,
     refresh: refresh,
     revoke: revoke,

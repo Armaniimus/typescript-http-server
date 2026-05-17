@@ -34,6 +34,7 @@ export const login: StrictHandler = async (req, res) => {
 				"createdAt": user.createdAt,
 				"updatedAt": user.updatedAt,
 				"email": user.email,
+				"isChirpyRed": user.is_chirpy_red,
 				"token": token,
 				"refreshToken": refreshToken
 			});

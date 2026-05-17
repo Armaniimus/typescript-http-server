@@ -5,14 +5,10 @@ import type { JwtPayload } from "jsonwebtoken";
 import { UnauthorizedError } from "./handlers/error-handlers.js";
 import * as crypto from "crypto";
 import { config } from "./config.js";
-
+import { isValidUUID } from "./util.js";
 
 type payload = Pick<JwtPayload, "iss" | "sub" | "iat" | "exp">;
 
-function isValidUUID(uuid: string) {
-	const regex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
-	return regex.test(uuid);
-}
 
 function payloadBuilder(userID: string): payload {
 	if (!isValidUUID(userID)) {
@@ -73,4 +69,13 @@ export function getBearerToken(req: Request): string {
 
 export function makeRefreshToken():string {
 	return crypto.randomBytes(32).toString('hex');
+}
+
+export function getAPIKey(req: Request): string {
+	const header = req.get("Authorization");
+	if (!header) {
+		throw new UnauthorizedError("failed to provide api key")
+	}
+
+	return header.replace("ApiKey", "").trim() as string;
 }
